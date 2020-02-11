@@ -1,0 +1,5 @@
+print("Choi")
+print("33age")
+print("wear : glasses")
+print("키 : 170cm")
+print("서울 거주")
