@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %} {% endblock %}
+{% block script %}
+
+$(function () {
+ $.ajax({
+                    type : 'GET' ,
+                    url : "{% url 'search:recommand' contentid=object.contentid areacode=object.areacode %}" ,
+                     success:function (result) {
+                        console.log(result)
+                        $("#recommand").empty(result)
+                        $("#recommand").append(result)
+                     }
+
+                })
+})
+
+
+{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    <div class="row">
+        <div class="card card-pin" style="border:0px; width: 20rem;margin:5px">
+        {% comment %}이미지 없는 장소는 기본이미지가 보이도록 하는 조건문{% endcomment %}
+        {% if object.firstimage != "None" %}
+            <img class="card-img-top" style="align-items: center;padding-left:30px;" width="400" height="400" src="{{ object.firstimage }}"><br>
+        {% else %}
+            {% load static %}
+                <img class="card-img-top" style="align-items: center;padding-left:30px;" width="400" height="400" src="{% static "noImage.jpg" %}"><br>
+        {% endif %}
+        </div>
+        <div class="card card-pin" style="width: 45rem;margin:5px">
+             <h3 class="card-title">{{ object.place_title }}
+              {% if myMark == 0 %}
+               <a class="btn btn-primary" href="{% url 'search:addMark' contentid=object.contentid %}"><i class="lni lni-heart"></i> 등록</a>
+              {% else %}
+               <a class="btn btn-danger" href="{% url 'search:delMark' contentid=object.contentid %}"><i class="lni lni-heart-filled"></i> 해제</a>
+              {% endif %}
+                 <a class="btn btn-warning" href="#"><span style="color: red"><b><i class="lni lni-heart-filled"></i> {{ mark }} </b></span></a>
+             </h3>
+            <br>
+            {{ object.addr }}<br>
+            {% if  object.tel != "None" %}
+            {{ object.tel }}<br>
+            {% endif %}
+            {% if  object.homepage != "None" %}
+             {% autoescape off %}
+                {{ object.homepage }}<br>
+             {% endautoescape %}
+            {% endif %}
+            <br>
+            {% autoescape off %}
+            {{ object.overview }}
+            {% endautoescape %}
+        </div>
+    </div>
+    <hr color="#2bdbdc" height="5">
+        <div>
+            <h3 class="sub-title">{{ object.place_title }} 관련 장소 추천입니다.</h3>
+        </div>
+    <div id="recommand" class="row justify-content-center">
+
+    </div>
+</form>
+
+{% endblock %}

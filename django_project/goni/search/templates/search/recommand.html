@@ -1,0 +1,15 @@
+    {% for one in resultList %}
+        <div class="card card-pin" style="width: 18rem;margin:5px;border:0px ">
+       {% comment %}이미지 없는 장소는 기본이미지가 보이도록 하는 조건문{% endcomment %}
+            {% if one.firstimage != "None" %}
+                <img class="card-img-top" width="300" height="300" src="{{ one.firstimage }}">
+            {% else %}
+                {% load static %}
+                <img class="card-img-top" width="300" height="300" src="{% static "noImage.jpg" %}">
+            {% endif %}
+         <div class="header-btn rounded-buttons" style="margin-bottom: 10px;">
+            <a class="main-btn rounded-one" style="width:100%" href="{% url 'search:detail' pk=one.contentid %}">{{ one.place_title }}</a>
+        </div>
+    </div>
+    <br>
+    {% endfor %}

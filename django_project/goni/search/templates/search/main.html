@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %} {% endblock %}
+{% block script %}
+
+    $(function () {
+        $.ajax({
+            url : "{% url 'search:rank'%}" ,
+            success: function (result) {
+                 $("#rank").empty(result)
+                 $("#rank").append(result)
+            }
+        })
+
+        addr1val = 0
+        addr2val = 0
+        $("#btn").click(function () {
+            //체크박스 선택 처리
+            var checkList=[]
+            $('input[name=category]:checked').each(function () {
+                checkList.push($(this).val())
+
+            })
+            if (checkList.length == 0 ){
+                alert("관광타입은 최소 한 개 이상 선택 해 주세요.")
+            }else{
+                //alert(checkList)
+                //주소1 선택처리
+                //주소2 선택처리
+                //alert(addr1val+".."+addr2val)
+                 $.ajax({
+                    type : 'POST' ,
+                    url : "{% url 'search:search'%}" ,
+                    data : {
+                        areacode: addr1val,
+                        sigungucode : addr2val,
+                        'contenttypeid[]' : checkList,
+                        place_title : $('#word').val(),
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                     success:function (result) {
+                        console.log(result)
+                        $("#result").empty(result)
+                        $("#result").append(result)
+                     }
+
+                }){% comment %}ajax{% endcomment %}
+            }
+
+        }){% comment %}btn click{% endcomment %}
+        $("#addr1").change(function () {
+            addr1val = $(this).val()
+            $.ajax({
+                type : 'POST',
+                url :"{% url 'search:addr2' %}",
+                data : {
+                  areacode : addr1val,
+                  csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                {#dataType : jSON,#}
+                success:function (addr2) {
+                   $("#divAddr2").empty(addr2)
+                   $("#divAddr2").append('<div class="text-color mt-10 style-two"><span class="info">상세지역선택</span></div>')
+                   $("#divAddr2").append(addr2)
+                    $("#addr2").change(function () {
+                        addr2val = $(this).val()
+                   })
+                }
+            }){% comment %}ajax{% endcomment %}
+        }){% comment %}addr1 select{% endcomment %}
+
+
+    })
+
+
+{% endblock %}
+
+{% block content %}
+        <form method="post">
+            {% csrf_token %}
+            <div id="search" class="float-left">
+            <div class="text-color mt-10 style-two">
+                <span class="info">관광타입</span>
+            </div>
+              <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" name="category" id="category1" value="12" class="custom-control-input">
+                <label for="category1" class="custom-control-label">관광지</label>
+             </div>
+                <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" name="category" id="category2" value="14" class="custom-control-input">
+                <label for="category2" class="custom-control-label">문화시설</label>
+                </div>
+                <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" name="category" id="category3" value="15" class="custom-control-input">
+                <label for="category3" class="custom-control-label">행사</label>
+                 </div>
+                <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" name="category" id="category4" value="28" class="custom-control-input">
+                <label for="category4" class="custom-control-label">레포츠</label>
+                </div>
+                <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" name="category" id="category5" value="32" class="custom-control-input">
+                <label for="category5" class="custom-control-label">숙박</label>
+                </div>
+                <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" name="category" id="category6" value="38"  class="custom-control-input">
+                <label for="category6" class="custom-control-label">쇼핑</label>
+                </div>
+                <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" name="category" id="category7" value="39" class="custom-control-input" >
+                <label for="category7" class="custom-control-label">음식</label>
+                </div>
+
+                <div id="divAddr1" >
+                  <div class="text-color mt-10 style-two">
+                    <span class="info">지역선택</span>
+                  </div>
+                    <select name="addr1" id="addr1" class="form-control">
+                        <option value="0">==시/도 선택==</option>
+                        {% for one in addrList %}
+                            <option value="{{ one.code }}">{{ one.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div id="divAddr2">
+                    <div class="text-color mt-10 style-two">
+                    <span class="info">상세지역선택</span>
+                     </div>
+                    <select name="addr2" id="addr2" class="form-control">
+                        <option value="0">==시/군/구 선택==</option>
+                    </select>
+                </div>
+                <div class="form-input">
+                    <div class="input-items default">
+                       <div class="text-color style-two">
+                        <span class="info">장소</span> <input type="text" placeholder="검색" size="20" name="word" id="word">
+                            </div>
+                    </div>
+                </div>
+                <div class="header-btn rounded-buttons">
+                    <input type="button" id="btn" class="main-btn rounded-three" value="장소검색"/>
+                </div>
+
+            </div>
+            <div id="rank" class="float-right">
+
+            </div>
+            {#    <div style="position:absolute; bottom: 20px;">#}
+            {#    <hr color="red"><br>#}
+            {#    </div>#}
+        </form>
+
+<div id="result" class="row container justify-content-center" >
+
+</div>
+{% endblock %}
