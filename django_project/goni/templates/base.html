@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <style>
+        {% block style %}{% endblock %}
+    </style>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/default.css' %}">
+    <link rel="stylesheet" href="{% static 'css/LineIcons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style-min.css' %}?after">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+            integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+            crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+            integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+            crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        {% block script %}{% endblock %}
+        $(function () {
+            $('#myplanner').click(function () {
+                {% if request.session.id != null %}
+                    location.href = "{% url 'planner:my_plan' m_id=request.session.id %}"
+                {% else %}
+                    alert('로그인 해주세요')
+                {% endif %}
+            })
+        })
+    </script>
+</head>
+<body>
+<section class="header-area header-one mb-30">
+    <div class="navbar-area navbar-one navbar-transparent" id="navbarOne">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <nav class="navbar navbar-expand-lg">
+                        <a class="navbar-brand" href="{% url 'planner:planList' %}">
+                            {% load static %}
+                            <img src="{% static 'goni_logo.png' %}" alt="Logo">
+                        </a>
+                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarOne"
+                                aria-controls="navbarOne" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="toggler-icon"></span>
+                            <span class="toggler-icon"></span>
+                            <span class="toggler-icon"></span>
+                        </button>
+
+                        <div class="collapse navbar-collapse sub-menu-bar" id="navbarOne">
+                            <ul class="navbar-nav m-auto">
+                                <li class="nav-item">
+                                    <a class="active" href="{% url 'planner:planList' %}">플래너</a>
+                                    <ul class="sub-menu">
+                                        <li><a href="{% url 'planner:planList' %}">플래너 목록</a></li>
+                                        <li><a href="{% url 'planner:create_plan' %}">플래너 작성</a></li>
+                                        {#                                        <li><a href="{% url 'planner:my_plan' m_id=request.session.id %}" id="myplanner">마이 플래너</a></li>#}
+                                        <li><a id="myplanner">마이 플래너</a></li>
+                                    </ul>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'search:main' %}">장소 검색</a>
+                                </li>
+                                {% if request.session.id %}
+                                    <li class="nav-item">
+                                        <a href="{% url 'member:update' pk=request.session.id %}">마이페이지</a>
+                                    </li>
+                                {% endif %}
+                                {% if request.session.id %}
+                                    <li class="nav-item"><a>{{ request.session.id }}님 환영합니다</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+
+                        <div class="navbar-btn d-none d-sm-inline-block">
+                            <ul>
+                                {% if request.session.id %}
+                                    <li><a class="light" href="{% url 'member:logout' %}">LogOut</a></li>
+                                {% else %}
+                                    <li><a class="light" href="{% url 'member:member_login' %}">Sign In</a></li>
+                                {% endif %}
+                                <li><a class="solid" href="{% url 'member:create' %}">Sign Up</a></li>
+                            </ul>
+                        </div>
+                    </nav> <!-- navbar -->
+                </div>
+            </div> <!-- row -->
+        </div> <!-- container -->
+    </div>
+</section>
+<section class="content">
+    <div class="container">
+        {% block content %}
+
+        {% endblock %}
+    </div>
+</section>
+<section class="footer-area footer-five footer-bark-five mt-30">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="footer-logo text-center">
+                    <a class="mt-30" href="{% url 'planner:planList' %}">
+                        {% load static %}
+                        <img src="{% static 'goni_logo2.png' %}" alt="Logo" style="width= 50px;height= 50px">
+                    </a>
+                </div> <!-- footer logo -->
+                <div class="footer-support text-center">
+                    <span class="number">+821072024045</span>
+                    <span class="mail">lyricalzy@gmail.com</span>
+                </div>
+                <div class="copyright text-center mt-35">
+                    <p class="text">Copyright © 2022 UIdeck. All Rights Reserved</p>
+                </div> <!--  copyright -->
+            </div>
+        </div> <!-- row -->
+    </div> <!-- container -->
+</section>
+</body>
+</html>
