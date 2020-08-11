@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}플래너 작성{% endblock %}
+{% block script %}
+    $(function () {
+    $('#sub').click(function () {
+    $.ajax({
+    type: 'POST',
+    url: '{% url 'planner:create_plan2' %}',
+    data: {
+    p_title: $('#p_title').val(),
+    m_id: $('#m_id').val(),
+    open_flag: $('#open_flag').prop("checked"),
+    t_start: $('#t_start').val(),
+    t_end: $('#t_end').val(),
+    concept: $('#concept').val(),
+    'csrfmiddlewaretoken': '{{ csrf_token }}'
+    },
+    success: function (result) {
+    location.href = '/planner/updatePlan/' + result;
+    }
+    })
+    })
+    })
+{% endblock %}
+{% block content %}
+    <table>
+        <tr>
+            <th width="100" height="50">제목</th>
+            <td><input type="text" id="p_title" name="p_title"></td>
+        </tr>
+        <tr>
+            <th height="50">작성자</th>
+            <td><input type="text" id="m_id" name="m_id" value="{{ request.session.id }}" disabled></td>
+        </tr>
+        <tr>
+            <th height="50">공개여부</th>
+            <td><input type="checkbox" id="open_flag" name="open_flag"></td>
+        </tr>
+        <tr>
+            <th height="50">시작일</th>
+            <td><input type="date" id="t_start" name="t_start"></td>
+        </tr>
+        <tr>
+            <th height="50">종료일</th>
+            <td><input type="date" id="t_end" name="t_end"></td>
+        </tr>
+        <tr>
+            <th height="50">여행컨셉</th>
+            <td><select id="concept" name="concept">
+                <option>남자 혼자</option>
+                <option>여자 혼자</option>
+                <option>남자끼리</option>
+                <option>여자끼리</option>
+            </select></td>
+        </tr>
+        <tr align="right">
+            <td colspan="2" height="50">
+                <div class="info-buttons">
+                    <input type="button" value="작성" id="sub" class="main-btn info-two">
+                </div>
+            </td>
+        </tr>
+    </table>
+{% endblock %}

@@ -1,0 +1,299 @@
+{% extends 'base.html' %}
+{% block title %}플래너 보기{% endblock %}
+{% block style %}
+    .wrap {
+    position: absolute;
+    left: 0;
+    bottom: 40px;
+    width: 288px;
+    height: 132px;
+    margin-left: -144px;
+    text-align: left;
+    overflow: hidden;
+    font-size: 12px;
+    font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;
+    line-height: 1.5;
+    }
+
+    .wrap * {
+    padding: 0;
+    margin: 0;
+    }
+
+    .wrap .info {
+    width: 286px;
+    height: 120px;
+    border-radius: 5px;
+    border-bottom: 2px solid #ccc;
+    border-right: 1px solid #ccc;
+    overflow: hidden;
+    background: #fff;
+    }
+
+    .wrap .info:nth-child(1) {
+    border: 0;
+    box-shadow: 0px 1px 2px #888;
+    }
+
+    .info .title {
+    padding: 5px 0 0 10px;
+    height: 30px;
+    background: #eee;
+    border-bottom: 1px solid #ddd;
+    font-size: 18px;
+    font-weight: bold;
+    }
+
+    .info .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #888;
+    width: 17px;
+    height: 17px;
+    background: url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/overlay_close.png');
+    }
+
+    .info .close:hover {
+    cursor: pointer;
+    }
+
+    .info .body {
+    position: relative;
+    overflow: hidden;
+    }
+
+    .info .desc {
+    position: relative;
+    margin: 13px 0 0 90px;
+    height: 75px;
+    }
+
+    .desc .ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    }
+
+    .desc .jibun {
+    font-size: 11px;
+    color: #888;
+    margin-top: -2px;
+    }
+
+    .info .img {
+    position: absolute;
+    top: 6px;
+    left: 5px;
+    width: 73px;
+    height: 71px;
+    border: 1px solid #ddd;
+    color: #888;
+    overflow: hidden;
+    }
+
+    .info:after {
+    content: '';
+    position: absolute;
+    margin-left: -12px;
+    left: 50%;
+    bottom: 0;
+    width: 22px;
+    height: 12px;
+    background: url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png')
+    }
+
+    .info .link {
+    color: #5085BB;
+    }
+{% endblock %}
+{% block script %}
+    $(function () {
+    var str = location.href;
+    var data = str.split('/')
+    $.ajax({
+    type: 'POST',
+    url: "{% url 'planner:get_route' %}",
+    data: {
+    p_id: data[5],
+    'csrfmiddlewaretoken': '{{ csrf_token }}'
+    },
+    success: function (totallist) {
+    for(var i=0;i<totallist.length;i++){
+    var routes = JSON.parse(totallist[i])
+    $(routes).each(function (index, item) {
+    $('#route_list').append('<li id="' + item['pk'] + '"' + 'class="routes"><i class="lni-angle-double-right"></i>' +
+    '<a href="/search/detail/' + item['pk'] + '">'+
+    item['fields']['place_title']+'</a></li><br>')
+    })
+    }
+    }
+    })
+    $('#delete').click(function(){
+    ask = confirm("정말 지우시겠습니까?")
+    if (ask){
+    $.ajax({
+    url: "/planner/planDelete/"+data[5],
+    success: function (){
+    alert("삭제 성공")
+    location.href='/planner/'
+    }
+    })
+    }
+    })
+    })
+{% endblock %}
+{% block content %}
+    <div id="map" style="width:70%;height:700px;float: left"></div>
+    <div id="rDiv" style="float: right">
+        <div bgcolor="#5f9ea0">
+            <table>
+                <tr>
+                    <th width="150">제목</th>
+                    <td>{{ object.p_title }}</td>
+                </tr>
+                <tr>
+                    <th>작성자</th>
+                    <td>{{ object.m_id }}</td>
+                </tr>
+                <tr>
+                    <th>시작일</th>
+                    <td>{{ object.t_start }}</td>
+                </tr>
+                <tr>
+                    <th>종료일</th>
+                    <td>{{ object.t_end }}</td>
+                </tr>
+                <tr>
+                    <th>여행컨셉</th>
+                    <td>{{ object.concept }}</td>
+            </table>
+        </div>
+        <div id="route" style="margin-top: 10px;text-align: center;"class="list-style mt-50">
+            경로<br><br>
+            <div  class="list-style-eight">
+            <ul id="route_list">
+
+            </ul>
+                </div>
+        </div>
+        <div style="position:absolute; right:30px; bottom:30px;" class="standard-buttons">
+            <input type="button" value="목록" id="list" onclick="location.href='/planner/'"
+                   class="main-btn standard-one sm-btn">
+            <input type="button" value="수정" id="update" onclick="location.href = '/planner/updatePlan/' + data[5]"
+                   class="main-btn standard-one sm-btn">
+            <input type="button" value="삭제" id="delete" class="main-btn standard-one sm-btn">
+        </div>
+    </div>
+
+    <script type="text/javascript"
+            src="//dapi.kakao.com/v2/maps/sdk.js?appkey=80a7d4591772bcd16ef4af7366dded4e"></script>
+    <script>
+        var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+            mapOption = {
+                center: new kakao.maps.LatLng(36.460649, 128.037005), // 지도의 중심좌표
+                level: 13 // 지도의 확대 레벨
+            };
+        var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
+        positions = []
+        markers = []
+        contents = []
+        overlays = []
+        titles = []
+        imgs = []
+        addrs = []
+        ids = []
+        hompages = []
+        linepath = new Array()
+        iwRemoveable = true; // removeable 속성을 ture 로 설정하면 인포윈도우를 닫을 수 있는 x버튼이 표시됩니다
+
+        var str = location.href;
+        var data = str.split('/')
+        var ids = new Array()
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'planner:get_route' %}",
+            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+            data: {
+                p_id: data[5],
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function (totallist) {
+                var i = 0
+                for (var total in totallist) {
+                    ids.push(totallist[total])
+                    var routes = JSON.parse(totallist[total])
+                    $(routes).each(function (index, item) {
+                        positions[i] = new kakao.maps.LatLng(item['fields']['mapy'], item['fields']['mapx'])
+                        linepath.push(positions[i])
+                        markers[i] = new kakao.maps.Marker({
+                            map: map,
+                            position: positions[i]
+                        });
+                        titles[i] = item['fields']['place_title']
+                        if (item['fields']['firstimage'] == 'None') {
+                            {% load static %}
+                            imgs[i] = '{% static 'planner/../../static/NoImage.jpg' %}'
+                        } else {
+                            imgs[i] = item['fields']['firstimage']
+                        }
+                        addrs[i] = item['fields']['addr']
+                        if (item['fields']['homepage'] == 'None') {
+                            hompages[i] = ""
+                        } else {
+                            hompages[i] = item['fields']['homepage']
+                        }
+                        contents[i] = '<div class="wrap" id="wrap' + i + '"' + '>' +
+                            '<div class="info">' +
+                            '<div class="title">' +
+                            titles[i] +
+                            '<div class="close" onclick="closeOverlay(' + i + ')" title="닫기"></div>' +
+                            '</div>' +
+                            '<div class="body">' +
+                            '<div class="img">' +
+                            '<img src=' + imgs[i] + ' width="73" height="70">' +
+                            '</div>' +
+                            '<div class="desc">' +
+                            '<div class="ellipsis">' + addrs[i] + '</div>' +
+                            '<div>' + hompages[i] + '</div>' +
+                            '<div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>';
+                        var overlay = new kakao.maps.CustomOverlay({
+                            content: contents[i],
+                            position: markers[i].getPosition()
+                        });
+                        var polyline = new kakao.maps.Polyline({
+                            path: linepath, // 선을 구성하는 좌표배열 입니다
+                            strokeWeight: 5, // 선의 두께 입니다
+                            strokeColor: '#0099ff', // 선의 색깔입니다
+                            strokeOpacity: 0.7, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
+                            strokeStyle: 'solid' // 선의 스타일입니다
+                        });
+                        polyline.setMap(map);
+
+                        // 마커에 클릭이벤트를 등록합니다
+                        kakao.maps.event.addListener(markers[i], 'click', makeClickListener(map, markers[i], overlay, i));
+                    })
+                    i++
+                }
+            }
+        })
+
+        // 마커 클릭시 호출되는 함수입니다
+        function makeClickListener(map, marker, overlay, i) {
+            return function () {
+                $('#wrap' + i).show()
+                overlay.setMap(map)
+            };
+        }
+
+        // 오버레이 닫기 버튼
+        function closeOverlay(i) {
+            $('#wrap' + i).hide()
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,342 @@
+{% extends 'base.html' %}
+
+{% block title %}플래너 수정{% endblock %}
+
+{% block style %}
+    .wrap {
+    position: absolute;
+    left: 0;
+    bottom: 40px;
+    width: 288px;
+    height: 132px;
+    margin-left: -144px;
+    text-align: left;
+    overflow: hidden;
+    font-size: 12px;
+    font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;
+    line-height: 1.5;
+    }
+
+    .wrap * {
+    padding: 0;
+    margin: 0;
+    }
+
+    .wrap .info {
+    width: 286px;
+    height: 120px;
+    border-radius: 5px;
+    border-bottom: 2px solid #ccc;
+    border-right: 1px solid #ccc;
+    overflow: hidden;
+    background: #fff;
+    }
+
+    .wrap .info:nth-child(1) {
+    border: 0;
+    box-shadow: 0px 1px 2px #888;
+    }
+
+    .info .title {
+    padding: 5px 0 0 10px;
+    height: 30px;
+    background: #eee;
+    border-bottom: 1px solid #ddd;
+    font-size: 18px;
+    font-weight: bold;
+    }
+
+    .info .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #888;
+    width: 17px;
+    height: 17px;
+    background: url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/overlay_close.png');
+    }
+
+    .info .close:hover {
+    cursor: pointer;
+    }
+
+    .info .body {
+    position: relative;
+    overflow: hidden;
+    }
+
+    .info .desc {
+    position: relative;
+    margin: 13px 0 0 90px;
+    height: 75px;
+    }
+
+    .desc .ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    }
+
+    .desc .jibun {
+    font-size: 11px;
+    color: #888;
+    margin-top: -2px;
+    }
+
+    .info .img {
+    position: absolute;
+    top: 6px;
+    left: 5px;
+    width: 73px;
+    height: 71px;
+    border: 1px solid #ddd;
+    color: #888;
+    overflow: hidden;
+    }
+
+    .info:after {
+    content: '';
+    position: absolute;
+    margin-left: -12px;
+    left: 50%;
+    bottom: 0;
+    width: 22px;
+    height: 12px;
+    background: url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png')
+    }
+
+    .info .link {
+    color: #5085BB;
+    }
+{% endblock %}
+{% block script %}
+    $(function () {
+    $("#concept option:contains('{{ object.concept }}')").attr("selected", true);
+    if ({{ object.open_flag }} == true)
+    {
+    $("input:checkbox[id='openflag']").attr("checked", true);
+    }
+    $.ajax({
+    type: 'POST',
+    url: "{% url 'planner:get_route' %}",
+    data: {
+    p_id: '{{ object.id }}',
+    'csrfmiddlewaretoken': '{{ csrf_token }}'
+    },
+    success: function (totallist) {
+    for (var i = 0; i < totallist.length; i++) {
+    var routes = JSON.parse(totallist[i])
+    $(routes).each(function (index, item) {
+    $('#route_list').append('<li style="height: 100px" id="' + item['pk'] + '"' +'class="routes"><div style="float: left;"><a href="/search/detail/' + item['pk'] + '">' + item['fields']['place_title'] +
+    '</a></div><div style="float: right"><button onclick="up(this)" style="background: #0099ff; border-color: #0099ff; color: white">▲</button><button onclick="del(this)" style="background: #0099ff; border-color: #0099ff; color: white">X</button><button onclick="down(this)" style="background: #0099ff; border-color: #0099ff; color: white">▼</button></div></li>')})
+    }
+    }
+    })
+    $('#sub').click(function () {
+    var str = location.href;
+    var data = str.split('/')
+    var routes = $('.routes')
+    var len = routes.length
+    $.ajax({
+    type: 'POST',
+    url: '/planner/updatePlan/' + {{ object.id }},
+    data: {
+    p_title: $('#ptitle').val(),
+    m_id: $('#mid').val(),
+    open_flag: $('#open_flag').prop("checked"),
+    t_start: $('#pstart').val(),
+    t_end: $('#pend').val(),
+    concept: $('#concept').val(),
+    'csrfmiddlewaretoken': '{{ csrf_token }}'
+    },
+    success: function () {
+    $.ajax({
+    type: 'POST',
+    url: '{% url 'planner:delete_route' %}',
+    data: {
+    p_id: data[5],
+    'csrfmiddlewaretoken': '{{ csrf_token }}'
+    },
+    success: function () {
+    for (var i = 0; i < len; i++) {
+    $.ajax({
+    type: 'POST',
+    url: '/planner/insertRoute/' + {{ object.id }},
+    data: {
+    p_id: {{ object.id }},
+    seq: i,
+    contentid: routes[i].getAttribute('id'),
+    'csrfmiddlewaretoken': '{{ csrf_token }}'
+    },
+    success: function () {
+    location.href = '/planner/'
+    }
+    })
+    }
+    }
+    })
+    }
+    })
+    })
+    })
+
+    function up(obj) {
+    var wrapper = $(obj).closest('li')
+    wrapper.insertBefore(wrapper.prev())
+    }
+
+    function down(obj) {
+    var wrapper = $(obj).closest('li')
+    wrapper.insertAfter(wrapper.next())
+    }
+
+    function del(obj) {
+    var wrapper = $(obj).closest('li')
+    wrapper.remove()
+    }
+{% endblock %}
+{% block content %}
+    <div id="map" style="width:70%;height: 700px;float: left"></div>
+    <div id="rDiv" style="float: right">
+        <div bgcolor="#5f9ea0">
+            <table>
+                <tr>
+                    <th width="100">제목</th>
+                    <td><input type="text" name="ptitle" id="ptitle" value="{{ object.p_title }}"></td>
+                </tr>
+                <tr>
+                    <th>작성자</th>
+                    <td><input type="text" name="mid" id="mid" value="{{ object.m_id }}" disabled></td>
+                </tr>
+                <tr>
+                    <th>시작일</th>
+                    <td><input type="date" name="pstart" id="pstart" value="{{ object.t_start }}"></td>
+                </tr>
+                <tr>
+                    <th>종료일</th>
+                    <td><input type="date" name="pend" id="pend" value="{{ object.t_end }}"></td>
+                </tr>
+                <tr>
+                    <th>공개여부</th>
+                    <td><input type="checkbox" name="openflag" id="openflag"></td>
+                </tr>
+                <tr>
+                    <th>여행컨셉</th>
+                    <td><select name="concept" id="concept">
+                        <option value="남자 혼자">남자 혼자</option>
+                        <option value="여자 혼자">여자 혼자</option>
+                        <option value="남자 끼리">남자끼리</option>
+                        <option value="여자 끼리">여자끼리</option>
+                    </select></td>
+            </table>
+        </div>
+        <div id="route" style="margin-top: 10px;text-align: center">
+            경로<br><br>
+            <ul id="route_list">
+
+            </ul>
+        </div>
+        <div style="position:absolute; right:30px; bottom:30px;">
+            <input type="submit" value="작성완료" id="sub">
+        </div>
+    </div>
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=80a7d4591772bcd16ef4af7366dded4e&libraries=clusterer"></script>
+    <script>
+        var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+            mapOption = {
+                center : new kakao.maps.LatLng(36.2683, 127.6358), // 지도의 중심좌표
+                level : 13 // 지도의 확대 레벨
+            };
+        var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
+        positions = []
+        markers = []
+        contents = []
+        overlays = []
+        titles = []
+        imgs = []
+        addrs = []
+        ids = []
+        hompages = []
+        iwRemoveable = true; // removeable 속성을 ture 로 설정하면 인포윈도우를 닫을 수 있는 x버튼이 표시됩니다
+
+        $.ajax({
+            url: '{% url 'planner:place_list' %}',
+            success: function (result) {
+                var clusterer = new kakao.maps.MarkerClusterer({
+                        map: map, // 마커들을 클러스터로 관리하고 표시할 지도 객체
+                        averageCenter: true, // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
+                        minLevel: 10 // 클러스터 할 최소 지도 레벨
+                    });
+                $(result).each(function (i, item) {
+                    ids[i] = item.pk
+                    $(item.fields).each(function (index, place) {
+                        positions[i] = new kakao.maps.LatLng(place.mapy, place.mapx)
+                        markers[i] = new kakao.maps.Marker({
+                            map: map,
+                            position: positions[i]
+                        });
+                        titles[i] = place.place_title
+                        if (item['fields']['firstimage'] == 'None') {
+                            imgs[i] = '/static/NoImage.jpg'
+                        } else {
+                            imgs[i] = item['fields']['firstimage']
+                        }
+                        addrs[i] = item['fields']['addr']
+                        if (item['fields']['homepage'] == 'None') {
+                            hompages[i] = ""
+                        } else {
+                            hompages[i] = item['fields']['homepage']
+                        }
+                        contents[i] = '<div class="wrap" id="wrap' + i + '"' + '>' +
+                            '<div class="info">' +
+                            '<div class="title">' +
+                            titles[i] +
+                            '<div class="close" onclick="closeOverlay(' + i + ')" title="닫기"></div>' +
+                            '</div>' +
+                            '<div class="body">' +
+                            '<div class="img">' +
+                            '<img src=' + imgs[i] + ' width="73" height="70">' +
+                            '</div>' +
+                            '<div class="desc">' +
+                            '<div class="ellipsis">' + addrs[i] + '</div>' +
+                            '<div>' + hompages[i] + '</div>' +
+                            '<button onclick="addClick(' + ids[i] + ',' + i + ')">추가</button>' +
+                            '<div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>';
+                        var overlay = new kakao.maps.CustomOverlay({
+                            content: contents[i],
+                            position: markers[i].getPosition()
+                        });
+                        // 마커에 클릭이벤트를 등록합니다
+                        kakao.maps.event.addListener(markers[i], 'click', makeClickListener(map, markers[i], overlay, i));
+                    })
+                    clusterer.addMarkers(markers);
+                })
+            }
+        })
+
+        // 마커 클릭시 호출되는 함수입니다
+        function makeClickListener(map, marker, overlay, i) {
+            return function () {
+                $('#wrap' + i).show()
+                overlay.setMap(map)
+            };
+        }
+
+        // 오버레이 닫기 버튼
+        function closeOverlay(i) {
+            $('#wrap' + i).hide()
+        }
+
+        // 경로 추가 버튼
+        function addClick(id, i) {
+            $('#route_list').append('<li style="height: 50px" id="' + id + '"' +'class="routes"><div style="float: left"><a href="/search/detail/' + id + '">' + titles[i] +
+            '</a></div><div style="float: right"><button onclick="up(this)" style="background: #0099ff; border-color: #0099ff; color: white">▲</button><button onclick="del(this)" style="background: #0099ff; border-color: #0099ff; color: white">X</button><button onclick="down(this)" style="background: #0099ff; border-color: #0099ff; color: white">▼</button></div></li>')
+            closeOverlay(i)
+        }
+    </script>
+{% endblock %}
