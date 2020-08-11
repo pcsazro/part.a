@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% block title %}어디 갈고니 회원가입{% endblock %}
+{% block style %}
+    @import url(//fonts.googleapis.com/earlyaccess/nanumpenscript.css);
+    .np {
+    font-family: 'Nanum Pen Script', cursive;
+    font-size: 30px;
+    }
+    #top {
+    width: 100%;
+    text-align: center;
+    }
+    #mid {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 200px;
+    min-width: 90px;
+    }
+    #h1 {
+    display: block;
+    font-size: 1.17em;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    }
+    #bottom {
+    width: 100%;
+    text-align: center;
+    }
+{% endblock %}
+{% block script %}
+    var maxChecked = 1;   //선택가능한 체크박스 갯수
+    var totalChecked = 0; // 설정 끝
+    function CountChecked(field) {
+    if (field.checked) // input check 박스가 체크되면
+    totalChecked += 1; // totalChecked 증가
+    else // 체크가 아니면
+    totalChecked -= 1; // totalChecked 감소
+
+    if (totalChecked > maxChecked) { // totalchecked 수가 maxchecked수보다 크다면
+    alert("최대 1개 까지만 가능합니다."); // 팝업창 띄움
+    field.checked = false;
+    totalChecked -= 1;
+    }
+    }
+    $(function () {
+    $('#pw1').keyup(function () {
+    var pwd1 = $('#pw').val();
+    var pwd2 = $('#pw1').val();
+    if (pwd1 != pwd2) {
+    $('#confirm2').text('비밀번호가 일치하지 않습니다.');
+    } else {
+    $('#confirm2').text('비밀번호가 일치합니다.');
+    }
+    })
+    $('#pw').keyup(function () {
+    var pwcount1 = $('#pw').val();
+    var pwcount2 = $('#pw').val();
+    if (pwcount1.length < 8) {
+    $('#confirm1').text('비밀번호 글자수는8자이상15자이하입니다.');
+    } else if (pwcount1.length > 15) {
+    $('#confirm1').text('글자수가15자를 초과합니다.');
+    } else {
+    $('#confirm1').text('적합한 글자수');
+    }
+    })
+    $('#name').keyup(function () {
+    $("#confirm1").remove();
+    $("#confirm2").remove();
+    })
+    $('#id').change(function () {
+    $('#btn-id').show();
+    });
+    $('#btn-id').click(function () {
+    var id = $('#id').val()
+    if (id == '') {
+    alert('아이디를 입력해주세요.')
+    return;
+    }
+    $.ajax({
+    url: '{% url 'member:check' %}',
+    type: 'get',
+    data: {
+    id: id
+    },
+    dataType: 'json',
+    success: function (response) {
+    if (response.result != 'success') {
+    console.error(response.data)
+    return;
+    }
+    if (response.data == 'exist') {
+    alert("동일한 아이디가 있습니다.");
+    $('#id').val('').focus();
+    return;
+    } else {
+    alert("사용이 가능한 아이디입니다.");
+    $('#btn-id').hide();
+    return;
+    }
+    console.log(response)
+    },
+    error: function (xhr, error) {
+    alert("서버와의 통신에서 문제가 발생했습니다.");
+    console.error("error : " + error);
+    }
+    })
+    });
+
+    })
+{% endblock %}
+<body>
+{% block content %}
+    <div id="container">
+        <form action="{% url 'member:create2' %}" method="post">
+            {% csrf_token %}
+            <h2 class="np" style="color:#262626;text-align: center">만나서 반가워요^^*</h2>
+            <span id="h1" class="np">아이디</span>
+            <div class="form-input">
+                <div class="input-items default">
+                    <div class="text-color style-two">
+                        <input type="text" placeholder="아이디 입력" size="20" name="id" id="id">
+                    </div>
+                </div>
+            </div>
+            <div class="header-btn rounded-buttons">
+                <input type="button" class="main-btn rounded-one" id="btn-id" value="중복체크"></input>
+            </div>
+            <br>
+            <span id="h1" class="np">패스워드</span>
+            <div class="form-input">
+                <div class="input-items default">
+                    <div class="text-color style-two">
+                        <input type="password" placeholder="비밀번호 입력" size="20" name="pw" id="pw">
+                    </div>
+                </div>
+            </div>
+            <div style=" color: #ff0000;" id="confirm1" class="np"></div>
+
+            <span id="h1" class="np">패스워드확인</span>
+            <div class="form-input">
+                <div class="input-items default">
+                    <div class="text-color style-two">
+                        <input type="password" placeholder="비밀번호 확인" size="20" name="pw1" id="pw1">
+                    </div>
+                </div>
+            </div>
+            <div style=" color: #ff0000;" id="confirm2" class="np"></div>
+
+            <span id="h1" class="np">성명</span>
+            <div class="form-input">
+                <div class="input-items default">
+                    <div class="text-color style-two">
+                        <input type="text" placeholder="성명 입력" size="20" name="name" id="name">
+                    </div>
+                </div>
+            </div>
+            <span id="h1" class="np">연락처</span>
+            <div class="form-input">
+                <div class="input-items default">
+                    <div class="text-color style-two">
+                        <input type="text" placeholder="연락처 입력" size="20" name="tel" id="tel">
+                    </div>
+                </div>
+            </div>
+            <span id="h1" class="np">이메일</span>
+            <div class="form-input">
+                <div class="input-items default">
+                    <div class="text-color style-two">
+                        <input type="text" placeholder="이메일 입력" size="20" name="email" id="email">
+                    </div>
+                </div>
+            </div>
+            <br><br>
+            <span class="np">성별</span>
+            <label><input type="checkbox" name="gender" value="남" onclick="CountChecked(this)">남</label>
+            <label><input type="checkbox" name="gender" value="여" onclick="CountChecked(this)">여</label><br><br><br>
+            <div class="header-btn rounded-buttons">
+                <input type="submit" id="join-submit" class="main-btn rounded-three" value="가입 완료"/>
+            </div>
+            <br><br>
+        </form>
+    </div>
+{% endblock %}

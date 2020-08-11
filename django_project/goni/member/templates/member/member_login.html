@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}어디 갈고니 회원가입{% endblock %}
+{% block style %}
+    @import url(//fonts.googleapis.com/earlyaccess/nanumpenscript.css);
+
+    .np {
+    font-family: 'Nanum Pen Script', cursive;
+    }
+
+    #top {
+    width: 100%;
+    text-align: center;
+    }
+
+    #mid {
+    margin: 0 auto;
+    width: 100%;
+    {#        max-width: 200px;#}
+    {#        min-width: 90px;#}
+    }
+
+    #h1 {
+    display: block;
+    font-size: 1.17em;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    }
+
+
+    #bottom {
+    width: 100%;
+    text-align: center;
+    }
+
+{% endblock %}
+{% block content %}
+    <div id="container">
+        <form action="{% url 'member:login' %}" method="post">
+            {% csrf_token %}
+            <h2 class="np" style="color:#262626;text-align: center">이번엔 어디로 떠나요?^^*</h2>
+            <span id="h1" class="np">아이디</span>
+            <div class="form-input">
+                <div class="input-items default">
+                    <div class="text-color style-two">
+                        <input type="text" placeholder="아이디 입력" size="20" name="id" id="id">
+                    </div>
+                </div>
+            </div>
+            <span id="h1" class="np">패스워드</span>
+            <div class="form-input">
+                <div class="input-items default">
+                    <div class="text-color style-two">
+                        <input type="password" placeholder="비밀번호 입력" size="20" name="pw" id="pw">
+                    </div>
+                </div>
+            </div>
+            {% if request.GET.results == 'fail' %}
+                <p style="color: red;" class="np">
+                    로그인이 실패 했습니다.
+                </p>
+            {% endif %}
+            <div class="header-btn rounded-buttons" style="float:right;">
+                <input type="submit" id="join-submit" class="main-btn rounded-three" value="로그인"/>
+            </div>
+        </form>
+    <br><br><br><br><br><br><br><br>
+        <span class="np" style="color:#262626; font-size: 30px">아직 회원이 아니세요?</span>
+        <div class="header-btn rounded-buttons">
+            <button onclick="location.href='{% url 'member:create' %}'" class="main-btn rounded-one">회 원 가 입</button>
+        </div>
+    </div>
+{% endblock %}

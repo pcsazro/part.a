@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}어디 갈고니{% endblock %}
+{% block style %}
+    @import url(//fonts.googleapis.com/earlyaccess/nanumpenscript.css);
+
+    .np {
+    font-family: 'Nanum Pen Script', cursive;
+    }
+
+    #top {
+    width: 100%;
+    text-align: center;
+    }
+
+    #mid {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 200px;
+    min-width: 90px;
+    }
+
+    #h1 {
+    display: block;
+    font-size: 1.17em;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    }
+
+
+    #bottom {
+    width: 100%;
+    text-align: center;
+    }
+{% endblock %}
+{% block content %}
+    <div id="container">
+        <p class="np" style="color:#0099ff; font-size: 30px">회원가입이 완료되었습니다</p>
+        <p class="np" style="color:#0099ff; font-size: 30px">즐겁게 떠나요ㅎㅎ</p>
+        <div class="header-btn rounded-buttons" style="float:right;">
+            <button class="main-btn rounded-three" onclick="location.href='{% url 'member:member_login' %}'">로그인하러 가기
+            </button>
+        </div>
+{#        <button onclick="location.href='{% url 'member:member_login' %}' " class="np">로그인하러가기</button>#}
+    </div>
+{% endblock %}

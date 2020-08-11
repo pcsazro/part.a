@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+    {% block title %}어디 갈고니{% endblock %}
+    {% block style %}
+    @import url(//fonts.googleapis.com/earlyaccess/nanumpenscript.css);
+
+    .np {
+        font-family: 'Nanum Pen Script', cursive;
+    }
+
+    #top {
+        margin: 0 auto;
+        width: 100%;
+        text-align: center;
+        max-width: 600px;
+        min-width: 300px;
+    }
+
+    #mid {
+        margin: 0 auto;
+        width: 100%;
+        max-width: 200px;
+        min-width: 90px;
+    }
+
+    #h1 {
+        display: block;
+        font-size: 1.17em;
+        margin-block-start: 1em;
+        margin-block-end: 1em;
+        margin-inline-start: 0px;
+        margin-inline-end: 0px;
+        font-weight: bold;
+    }
+
+
+    #bottom {
+        width: 100%;
+        text-align: center;
+    }
+
+    {% endblock %}
+{% block content %}
+<div id="top" style="background:white; alignment: center ">
+    <span class="np" style="color:#0099ff; font-size: 80px">어디갈고니?</span>
+    {% if request.session.id %}
+        <span style="color:#0099ff; font-size: 8px">{{ request.session.id }}님이 로그인중입니다</span>
+        <button onclick="location.href='{% url 'member:update' pk=request.session.id %}' " class="np">내정보확인및수정</button>
+{#        <button type="button" onclick="location.href='{% url 'mark:mlist' pk=request.session.id %}'" class="np">찜목록</button>#}
+        <button type="button" onclick="location.href='{% url 'member:logout' %}'" class="np">Logout</button>
+    {% else %}
+        <button type="button" onclick="location.href='{% url 'member:member_login' %}'" class="np">Login</button>
+    {% endif %}
+</div>
+
+
+<div id="mid">
+   <span style="font-size: 30px; color:#0099ff;" class="np">어디든 가자><</span>
+     <span style="font-size: 30px; color:#0099ff;" class="np">내손에 플래너</span>
+{#   <button onclick="location.href='{% url 'planner:plist' %}' " class="np">여행지 구경하기</button>#}
+
+
+</div>
+{% endblock %}
